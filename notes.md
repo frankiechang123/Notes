@@ -222,29 +222,63 @@ TODO
 
 --> "Desired State Management"
 
+<img src="/Users/yiyangzhou/Desktop/Stuff/Notes/images/components-of-kubernetes.svg" style="zoom:50%;" />
+
 ## Cluster Architechture
 
 ### Control Plane
 
 - Manges worker nodes/pods
-  - makes decisions: ensure `replicas` 
+  - makes decisions: e.g. ensure `replicas` 
 - Components
   - Kube-apiserver 
+    - Communications between Control Plane and Nodes
   - etcd
   - Kube-scheduler
+    - watches newly created pods
     - assign pods to node
   - Kube-controller-manager
+    - runs the controller process
   - cloud-controller-manager
-  - 
+    - link cluster to cloud provider's API
 
 ### Node
 
+- Identified by name; 两个Node不能有相同的name
+
+##### Components
+
 - kubelet
   - make sure containers are running in a pod
+  - ensure normal pod termination process
+    - Graceful node shutdown
+      - Phase1: terminate regular pods
+      - Phase2: terminate critical pods
 - container runtime
   - e.g, docker
 - Kube-proxy
   - maintains network rules
+
+##### Node Status
+
+- Addresses地址
+- Conditions状况
+- 容量与可分配： `capacity`, `allocatable`
+- 信息: 版本信息
+
+##### Node Controller节点控制器
+
+- Assign a CIDR block to Node
+- 保证节点控制器内的节点列表与服务商所提供的可用机器列表同步
+- monitoring nodes' health
+  - update Node status: e.g. `NodeReady` to `ConditionUnknown`
+  - evict unreachable pods
+
+##### Heartbeat心跳
+
+- `NodeStatus`
+- Lease object
+  - lease object is updated every 10 seconds, independent from `NodeStatus` updates
 
 ## Kubernetes Objects
 
@@ -258,9 +292,11 @@ TODO
 
 ### Workload Resources
 
+​		workload resources configure controllers that ensures the "desired state"
+
 #### Deployments
 
-A controller. Provides updates for Pods and ReplicaSets
+Configures a controller. Provides updates for Pods and ReplicaSets
 
 - upgrade/scale/undo
 
@@ -805,7 +841,15 @@ x_ones = torch.ones_like(x_data)
 x_rand = torch.rand_like(x_data, dtype=torch.float)
 ```
 
+### 关于Pytorch性能
 
+https://github.com/YellowOldOdd/SDBI
+
+Batch变大可以提高Throughput ： 3 processes+Batch32： 1215.47 pic/s
+
+
+
+Dynamic Batching： 开源项目SDBI， 将零碎的数据组合打包
 
 # TensorRT
 
@@ -855,6 +899,107 @@ Cuda in Nvidia GPU card: Compute unified device architechture
 
 
 ----------------
+
+
+
+# RPC	
+
+Remote Procedure Call
+
+远程调用的问题
+
+- Function ID： 用ID来确定哪个函数
+- 序列化和反序列化：用于传参数
+- 网络传输
+
+# Thrift
+
+an RPC framework
+
+
+
+### `.thrift` file
+
+```
+```
+
+### Generate sorce code from `.thrift`
+
+```shell
+thrift
+thrift -r --gen py example.thrift
+```
+
+### Do RPC in client and server
+
+https://thrift.apache.org/tutorial/py.html
+
+
+
+## Layers
+
+#### Transport
+
+Client: `Transport`
+
+```python
+ # Make socket
+  transport = TSocket.TSocket('localhost', 9090)
+
+  # Buffering is critical. Raw sockets are very slow
+  transport = TTransport.TBufferedTransport(transport)
+  transport.open()
+  transport.close()
+
+```
+
+Server: `ServerTransport`
+
+```python
+transport = TSocket.TServerSocket(host='127.0.0.1', port=9090)
+```
+
+
+
+#### Protocol
+
+defines the scheme for serialization/deserialization (如何序列化和反序列化)
+
+https://thrift.apache.org/docs/concepts.html
+
+#### Processor
+
+encapsulates the ability to read from input streams and write to output streams
+
+```java
+interface TProcessor {
+    bool process(TProtocol in, TProtocol out) throws TException
+}
+```
+
+
+
+#### Server
+
+pulls everything together
+
+1. 创建transport
+2. 创建input/output protocols for the transport
+3. processor
+4. wait for connection
+
+```python
+server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+server.serve()
+```
+
+
+
+# Protobuf
+
+serializing structured data  序列化
+
+https://developers.google.com/protocol-buffers/docs/pythontutorial
 
 
 
