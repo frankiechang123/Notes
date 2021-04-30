@@ -150,9 +150,7 @@ docker push <name>
 
 ## Building Apps
 
-#### Multi-stage builds
 
-TODO
 
 #### Volumes
 
@@ -160,7 +158,7 @@ TODO
 
 #### Kubernetes
 
-- containers schedules as pods
+- containers scheduled as pods
 
 - workloads scheduled as deployments(groups of pods)
 
@@ -539,7 +537,7 @@ https://redis.io/commands#hash
 
 ## Redis Architechture
 
-复制Replication: 主从复制Master-Slace Architechture
+复制Replication: 主从复制Master-Slave Architechture
 
 - 对master读写
 - 对slave只读
